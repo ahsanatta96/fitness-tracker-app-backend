@@ -1,0 +1,29 @@
+{
+  "name": "fitness-tracker-app-backend",
+  "version": "1.0.0",
+  "description": "FYP Backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahsanatta96/fitness-tracker-app-backend.git"
+  },
+  "keywords": [
+    "FYP",
+    "Backend",
+    "Fitness",
+    "Tracker",
+    "App"
+  ],
+  "author": "Ahsan Atta",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ahsanatta96/fitness-tracker-app-backend/issues"
+  },
+  "homepage": "https://github.com/ahsanatta96/fitness-tracker-app-backend#readme",
+  "dependencies": {
+    "express": "^4.18.3"
+  }
+}
