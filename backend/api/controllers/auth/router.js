@@ -1,7 +1,7 @@
 const express = require("express");
 const controller = require("./controller");
 const { sanitizeData } = require("../../../helpers/security");
-const { auth } = require("../../middleware/auth");
+const { auth, adminAuth } = require("../../middleware/auth");
 const { uploadTrainerDocuments } = require("../../../helpers/multer");
 
 const router = express.Router();
@@ -14,5 +14,6 @@ router.post(
 );
 router.post("/login", sanitizeData, controller.login);
 router.get("/profile", auth, controller.myProfile);
+router.put("/approve/:id", adminAuth, controller.approveTrainer);
 
 module.exports = router;

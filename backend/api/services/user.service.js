@@ -16,10 +16,15 @@ const findUserById = (id) => {
   return User.findById(id);
 };
 
+const findUserByRoleId = (roleId) => {
+  return User.findOne({ roleId });
+};
+
 const userService = {
   newUser,
   saveUser,
   findUserById,
   findUserByEmail,
+  findUserByRoleId,
 };
 module.exports = userService;

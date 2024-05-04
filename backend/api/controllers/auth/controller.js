@@ -3,6 +3,7 @@ const userService = require("../../services/user.service");
 const traineeService = require("../../services/trainee.service");
 const trainerService = require("../../services/trainer.service");
 
+// Register
 const register = async (req, res) => {
   let session;
   try {
@@ -42,7 +43,7 @@ const register = async (req, res) => {
       default:
         await session.abortTransaction();
         session.endSession();
-        return res.status(400).json({ error: "Invalid role" });
+        return res.status(400).json({ message: "Invalid role" });
     }
 
     user.roleId = roleUser._id;
@@ -69,7 +70,7 @@ const register = async (req, res) => {
     });
   } catch (error) {
     await session.abortTransaction();
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ message: error.message });
   } finally {
     session.endSession();
   }
@@ -86,14 +87,16 @@ const login = async (req, res) => {
       return res.status(400).json({ error: "Invalid password" });
     }
     const token = await user.generateJWT();
+    const role = user.role;
     res
       .status(200)
-      .json({ message: "User logged in successfully", data: token });
+      .json({ message: "User logged in successfully", data: { token, role } });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
+// My Profile
 const myProfile = async (req, res) => {
   try {
     const user = req.user;
@@ -108,8 +111,26 @@ const myProfile = async (req, res) => {
   }
 };
 
+const approveTrainer = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const trainer = await userService.findUserById(id);
+    if (!trainer) {
+      return res.status(400).json({ error: "Trainer not found" });
+    }
+    trainer.status = req.body.status;
+    await trainer.save();
+    res
+      .status(200)
+      .json({ message: "Trainer approved successfully", data: trainer });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   register,
   login,
   myProfile,
+  approveTrainer,
 };
