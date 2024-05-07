@@ -25,6 +25,7 @@ exports.auth = async (req, res, next) => {
       }
 
       req.user = user._id;
+      req.role = user.role;
       next();
     }
   });

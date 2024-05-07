@@ -3,20 +3,21 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 var morgan = require("morgan");
 const chalk = require("chalk");
-const { createServer } = require("http");
-
-const errorMiddlware = require("./api/middleware/errors");
-const authRouter = require("./api/controllers/auth/router");
 const path = require("path");
+const { createServer } = require("http");
+const errorMiddlware = require("./api/middleware/errors");
+
+const authRouter = require("./api/controllers/auth/router");
+const adminRouter = require("./api/controllers/admin/router");
+const trainerRouter = require("./api/controllers/trainer/router");
+const publicRouter = require("./api/controllers/public/router");
 
 //initializing App
 const app = express();
 const server = createServer(app);
 
 app.use(morgan("dev"));
-
 app.use(cors());
-
 require("dotenv").config({ path: ".env" });
 
 // Body parser
@@ -25,11 +26,26 @@ app.use(errorMiddlware);
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/admin", adminRouter);
+app.use("/api/v1/trainer", trainerRouter);
+app.use("/api/v1/public", publicRouter);
 
 // Endpoint to serve the trainer documents
 app.use(
   "/data",
   express.static(path.join(__dirname, "api/data/trainerDocuments"))
+);
+
+// Endpoint to serve the program images
+app.use(
+  "/data",
+  express.static(path.join(__dirname, "api/data/programImages"))
+);
+
+// Endpoint to serve the profile images
+app.use(
+  "/data",
+  express.static(path.join(__dirname, "api/data/profileImages"))
 );
 
 // Handle Uncaught exceptions

@@ -76,6 +76,7 @@ const register = async (req, res) => {
   }
 };
 
+// Login
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -128,9 +129,43 @@ const approveTrainer = async (req, res) => {
   }
 };
 
+// Update User
+const updateProfile = async (req, res) => {
+  try {
+    const user = await userService.findUserById(req.user);
+    const { first_name, last_name } = req.body;
+
+    user.first_name = first_name;
+    user.last_name = last_name;
+
+    await user.save();
+    res
+      .status(200)
+      .json({ message: "Profile updated successfully", data: user });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Update Profile Image
+const updateProfileImage = async (req, res) => {
+  try {
+    const user = await userService.findUserById(req.user);
+    user.profile_image = req.file.filename;
+    await user.save();
+    res
+      .status(200)
+      .json({ message: "Profile image updated successfully", data: user });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   register,
   login,
   myProfile,
   approveTrainer,
+  updateProfile,
+  updateProfileImage,
 };

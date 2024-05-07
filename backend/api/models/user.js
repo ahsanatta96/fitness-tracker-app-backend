@@ -27,7 +27,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please provide your last name"],
     },
-    profile_profile: {
+    profile_image: {
       type: String,
     },
     email: {

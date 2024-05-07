@@ -7,7 +7,7 @@ function generateRandomCode() {
   return Math.floor(100000 + Math.random() * 900000); // Generates a random 6-digit number
 }
 
-// Function to upload product image
+// Function to upload trainer documents
 const uploadTrainerDocuments = () => {
   const createDestinationDirectory = () => {
     const destinationPath = path.join(
@@ -35,9 +35,72 @@ const uploadTrainerDocuments = () => {
       },
     }),
     fileFilter(req, file, cb) {
-      if (!file.originalname.match(/\.(jpeg|JPEG|jpg|JPG|png|PNG)$/)) {
-        return cb(undefined, false);
-      }
+      cb(undefined, true);
+    },
+  });
+};
+
+// Function to upload program images
+const uploadProgramImage = () => {
+  const createDestinationDirectory = () => {
+    const destinationPath = path.join(
+      __dirname,
+      "..",
+      "api",
+      "data",
+      "programImages"
+    );
+    if (!fs.existsSync(destinationPath)) {
+      fs.mkdirSync(destinationPath, { recursive: true });
+    }
+    return destinationPath;
+  };
+
+  return multer({
+    storage: multer.diskStorage({
+      destination(req, file, cb) {
+        cb(null, createDestinationDirectory());
+      },
+      filename(req, file, cb) {
+        const randomCode = generateRandomCode();
+        const fileName = `${randomCode}_${file.originalname}`;
+        cb(null, fileName);
+      },
+    }),
+    fileFilter(req, file, cb) {
+      cb(undefined, true);
+    },
+  });
+};
+
+// Function to upload profile image
+const uploadProfileImage = () => {
+  const createDestinationDirectory = () => {
+    const destinationPath = path.join(
+      __dirname,
+      "..",
+      "api",
+      "data",
+      "profileImages"
+    );
+    if (!fs.existsSync(destinationPath)) {
+      fs.mkdirSync(destinationPath, { recursive: true });
+    }
+    return destinationPath;
+  };
+
+  return multer({
+    storage: multer.diskStorage({
+      destination(req, file, cb) {
+        cb(null, createDestinationDirectory());
+      },
+      filename(req, file, cb) {
+        const randomCode = generateRandomCode();
+        const fileName = `${randomCode}_${file.originalname}`;
+        cb(null, fileName);
+      },
+    }),
+    fileFilter(req, file, cb) {
       cb(undefined, true);
     },
   });
@@ -45,4 +108,6 @@ const uploadTrainerDocuments = () => {
 
 module.exports = {
   uploadTrainerDocuments,
+  uploadProgramImage,
+  uploadProfileImage,
 };
