@@ -15,5 +15,5 @@ router.post(
 router.put("/add-day/:id", auth, controller.addDayToProgram);
 router.put("/add-exercise/:id", auth, controller.addExerciseToDay);
 router.put("/update-exercise/:id", auth, controller.updateExercise);
-router.delete("/delete-exercise/:id", auth, controller.deleteExercise);
+router.put("/delete-exercise/:id", auth, controller.deleteExercise);
 module.exports = router;
