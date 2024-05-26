@@ -11,25 +11,47 @@ const TraineeSchema = new mongoose.Schema(
     },
     program: [
       {
-        day: {
+        name: {
           type: String,
         },
-        exercises: [
+        description: {
+          type: String,
+        },
+        image: {
+          type: String,
+        },
+        price: {
+          type: Number,
+        },
+        trainerId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Trainer",
+        },
+
+        days: [
           {
             name: {
               type: String,
             },
-            description: {
-              type: String,
-            },
-            status: {
-              type: String,
-              enum: ["completed", "pending", "missed", "skipped"],
-              default: "pending",
-            },
-            skipReason: {
-              type: String,
-            },
+            exercises: [
+              {
+                name: {
+                  type: String,
+                },
+                description: {
+                  type: String,
+                },
+                status: {
+                  type: String,
+                  enum: ["completed", "pending", "missed", "skipped"],
+                  default: "pending",
+                },
+                skipReason: {
+                  type: String,
+                  default: null,
+                },
+              },
+            ],
           },
         ],
       },

@@ -5,16 +5,52 @@ var morgan = require("morgan");
 const chalk = require("chalk");
 const path = require("path");
 const { createServer } = require("http");
+const { Server } = require("socket.io");
 const errorMiddlware = require("./api/middleware/errors");
 
 const authRouter = require("./api/controllers/auth/router");
 const adminRouter = require("./api/controllers/admin/router");
 const trainerRouter = require("./api/controllers/trainer/router");
 const publicRouter = require("./api/controllers/public/router");
+const traineeRouter = require("./api/controllers/trainee/router");
+const Message = require("./api/models/messages");
 
 //initializing App
 const app = express();
 const server = createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("A user connected");
+
+  socket.on("join", (room) => {
+    socket.join(room);
+  });
+
+  socket.on("message", async (message, room, senderId, receiverId) => {
+    console.log("Message Received: ", message);
+
+    // Save the message to the database
+    const newMessage = new Message({
+      senderId: senderId,
+      receiverId: receiverId,
+      message: message,
+      chatRoomId: room,
+    });
+    await newMessage.save();
+
+    io.to(room).emit("message", newMessage);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+  });
+});
 
 app.use(morgan("dev"));
 app.use(cors());
@@ -29,6 +65,7 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/trainer", trainerRouter);
 app.use("/api/v1/public", publicRouter);
+app.use("/api/v1/trainee", traineeRouter);
 
 // Endpoint to serve the trainer documents
 app.use(
