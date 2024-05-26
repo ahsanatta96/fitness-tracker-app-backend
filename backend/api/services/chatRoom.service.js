@@ -1,23 +1,23 @@
-const ChatRoom = require("../models/chatRoom.model");
+const ChatRoom = require("../models/chatRoom");
 
 const newChatRoom = (body) => {
-  return new ChatRoom(body);
+	return new ChatRoom(body);
 };
 
 const saveChatRoom = (chatRoom) => {
-  return chatRoom.save();
+	return chatRoom.save();
 };
 
 const getChatRoomByRoleId = (roleId) => {
-  return ChatRoom.find({
-    $or: [{ traineeId: roleId }, { trainerId: roleId }],
-  });
+	return ChatRoom.find({
+		$or: [{ traineeId: roleId }, { trainerId: roleId }],
+	});
 };
 
 const chatRoomService = {
-  newChatRoom,
-  saveChatRoom,
-  getChatRoomByRoleId,
+	newChatRoom,
+	saveChatRoom,
+	getChatRoomByRoleId,
 };
 
 module.exports = chatRoomService;
