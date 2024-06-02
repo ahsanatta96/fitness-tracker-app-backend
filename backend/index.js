@@ -13,6 +13,7 @@ const adminRouter = require("./api/controllers/admin/router");
 const trainerRouter = require("./api/controllers/trainer/router");
 const publicRouter = require("./api/controllers/public/router");
 const traineeRouter = require("./api/controllers/trainee/router");
+const messageRouter = require("./api/controllers/messages/router");
 const Message = require("./api/models/messages");
 
 //initializing App
@@ -66,6 +67,7 @@ app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/trainer", trainerRouter);
 app.use("/api/v1/public", publicRouter);
 app.use("/api/v1/trainee", traineeRouter);
+app.use("/api/v1/messages", messageRouter);
 
 // Endpoint to serve the trainer documents
 app.use(
