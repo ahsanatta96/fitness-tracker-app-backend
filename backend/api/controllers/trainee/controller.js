@@ -69,8 +69,31 @@ const getTraineeSingleProgram = async (req, res) => {
 		});
 	}
 };
+const updateSingleExerciseStatus = async (req, res) => {
+	try {
+		
+		const { status,exerciseId,dayId,programId } = req.body;
+		const userId = req.user;
+		const trainee = await traineeService.findTraineeByUserId(userId);
+		const program = trainee.program.find((p) => p._id.toString() === programId);
+		const day = program.days.find((d) => d._id.toString() === dayId);
+		const exercise = day.exercises.find((e) => e._id.toString() === exerciseId);
+		exercise.status = status;
+		program.status = status;
+		await traineeService.saveTrainee(trainee);
+		return res.status(200).send({
+			message: "Program updated successfully!",
+			data: program,
+		});
+	} catch (error) {
+		return res.status(400).send({
+			message: error.message,
+		});
+	}
+}
 module.exports = {
 	bookProgram,
 	getAllPrograms,
 	getTraineeSingleProgram,
+	updateSingleExerciseStatus
 };
