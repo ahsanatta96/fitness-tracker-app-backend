@@ -7,9 +7,15 @@ const { sanitizeData } = require("../../../helpers/security");
 router.post("/book-program/:id", auth, sanitizeData, controller.bookProgram);
 router.get("/programs", auth, controller.getAllPrograms);
 router.get(
-	"/program-details/:programId",
-	auth,
-	controller.getTraineeSingleProgram,
+  "/program-details/:programId",
+  auth,
+  controller.getTraineeSingleProgram
+);
+router.put(
+  "/update-exercise-status/:id",
+  auth,
+  sanitizeData,
+  controller.updateExerciseStatus
 );
 router.put("/update-status", auth, controller.updateSingleExerciseStatus);
 

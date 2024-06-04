@@ -14,6 +14,10 @@ const TraineeSchema = new mongoose.Schema(
         name: {
           type: String,
         },
+        date: {
+          type: Date,
+          default: null,
+        },
         description: {
           type: String,
         },

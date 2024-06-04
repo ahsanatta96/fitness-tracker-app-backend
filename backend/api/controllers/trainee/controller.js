@@ -3,97 +3,157 @@ const programService = require("../../services/program.service");
 const traineeService = require("../../services/trainee.service");
 
 const bookProgram = async (req, res) => {
-	try {
-		const { id } = req.params; // program-id
-		const userId = req.user;
+  try {
+    const { id } = req.params; // program-id
+    const userId = req.user;
 
-		const trainee = await traineeService.findTraineeByUserId(userId);
-		if (!trainee) {
-			return res.status(404).json({ message: "Trainee not found!" });
-		}
+    const trainee = await traineeService.findTraineeByUserId(userId);
+    if (!trainee) {
+      return res.status(404).json({ message: "Trainee not found!" });
+    }
 
-		if (!id) {
-			return res.status(400).json({ message: "Program is required!" });
-		}
+    if (!id) {
+      return res.status(400).json({ message: "Program is required!" });
+    }
 
-		const program = await programService.findProgramById(id);
-		if (!program) {
-			return res.status(404).json({ message: "Program not found!" });
-		}
+    const program = await programService.findProgramById(id);
+    if (!program) {
+      return res.status(404).json({ message: "Program not found!" });
+    }
 
-		trainee.program.push(program);
-		await traineeService.saveTrainee(trainee);
+    // Set the date for each program object
+    const currentDate = new Date();
+    program.date = currentDate;
+    trainee.program.forEach((program, index) => {
+      if (index > 0) {
+        const nextDate = new Date(currentDate);
+        nextDate.setDate(currentDate.getDate() + index);
+        program.date = nextDate;
+      }
+    });
 
-		const chatRoom = chatRoomService.newChatRoom({
-			traineeId: userId,
-			trainerId: program.trainerId,
-		});
+    trainee.program.push(program);
+    await traineeService.saveTrainee(trainee);
 
-		await chatRoomService.saveChatRoom(chatRoom);
+    const chatRoom = chatRoomService.newChatRoom({
+      traineeId: userId,
+      trainerId: program.trainerId,
+    });
 
-		res.status(200).json({
-			message: "Program booked successfully!",
-			data: trainee?.program,
-		});
-	} catch (error) {
-		res.status(400).json({ message: error.message });
-	}
+    await chatRoomService.saveChatRoom(chatRoom);
+
+    res.status(200).json({
+      message: "Program booked successfully!",
+      data: trainee?.program,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
 const getAllPrograms = async (req, res) => {
-	try {
-		const userId = req.user;
-		const trainee = await traineeService.findTraineeByUserId(userId);
-		return res.status(200).send({
-			message: "All programs fetched successfully!",
-			data: trainee?.program,
-		});
-	} catch (error) {
-		res.status(400).json({ message: error.message });
-	}
+  try {
+    const userId = req.user;
+    const trainee = await traineeService.findTraineeByUserId(userId);
+    return res.status(200).send({
+      message: "All programs fetched successfully!",
+      data: trainee?.program,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
+
 const getTraineeSingleProgram = async (req, res) => {
-	try {
-		const { programId } = req.params;
-		const userId = req.user;
-		console.log(programId);
-		const trainee = await traineeService.findTraineeByUserId(userId);
-		const program = trainee.program.id(programId);
-		return res.status(200).send({
-			message: "Program fetched successfully!",
-			data: program,
-		});
-	} catch (error) {
-		return res.status(400).send({
-			message: error.message,
-		});
-	}
+  try {
+    const { programId } = req.params;
+    const userId = req.user;
+    console.log(programId);
+    const trainee = await traineeService.findTraineeByUserId(userId);
+    const program = trainee.program.id(programId);
+    return res.status(200).send({
+      message: "Program fetched successfully!",
+      data: program,
+    });
+  } catch (error) {
+    return res.status(400).send({
+      message: error.message,
+    });
+  }
 };
 const updateSingleExerciseStatus = async (req, res) => {
-	try {
-		
-		const { status,exerciseId,dayId,programId } = req.body;
-		const userId = req.user;
-		const trainee = await traineeService.findTraineeByUserId(userId);
-		const program = trainee.program.find((p) => p._id.toString() === programId);
-		const day = program.days.find((d) => d._id.toString() === dayId);
-		const exercise = day.exercises.find((e) => e._id.toString() === exerciseId);
-		exercise.status = status;
-		program.status = status;
-		await traineeService.saveTrainee(trainee);
-		return res.status(200).send({
-			message: "Program updated successfully!",
-			data: program,
-		});
-	} catch (error) {
-		return res.status(400).send({
-			message: error.message,
-		});
-	}
-}
+  try {
+    const { status, exerciseId, dayId, programId } = req.body;
+    const userId = req.user;
+    const trainee = await traineeService.findTraineeByUserId(userId);
+    const program = trainee.program.find((p) => p._id.toString() === programId);
+    const day = program.days.find((d) => d._id.toString() === dayId);
+    const exercise = day.exercises.find((e) => e._id.toString() === exerciseId);
+    exercise.status = status;
+    program.status = status;
+    await traineeService.saveTrainee(trainee);
+    return res.status(200).send({
+      message: "Program updated successfully!",
+      data: program,
+    });
+  } catch (error) {
+    return res.status(400).send({
+      message: error.message,
+    });
+  }
+};
+
+const updateExerciseStatus = async (req, res) => {
+  try {
+    const { id } = req.params; // exercise _id
+    const { status } = req.body; // new status
+
+    if (status !== "completed" || status !== "skipped") {
+      return res
+        .status(400)
+        .json({ message: `You can't set status to ${status}!` });
+    }
+
+    const trainee = await traineeService.findTraineeByUserId(req.user);
+    if (!trainee) {
+      return res.status(404).json({ message: "Trainee not found!" });
+    }
+
+    const program = trainee.program.find((program) => {
+      return program.days.find((day) => {
+        return day.exercises.find((exercise) => exercise._id.toString() === id);
+      });
+    });
+
+    if (!program) {
+      return res.status(404).json({ message: "Exercise not found!" });
+    }
+
+    const exercise = program.days
+      .find((day) => {
+        return day.exercises.find((exercise) => exercise._id.toString() === id);
+      })
+      .exercises.find((exercise) => exercise._id.toString() === id);
+
+    // Update values
+    exercise.status = status;
+    if (req.body.skipReason) {
+      exercise.skipReason = req.body.skipReason;
+    }
+    await traineeService.saveTrainee(trainee);
+
+    res.status(200).json({
+      message: "Exercise status updated successfully!",
+      data: exercise,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
-	bookProgram,
-	getAllPrograms,
-	getTraineeSingleProgram,
-	updateSingleExerciseStatus
+  bookProgram,
+  getAllPrograms,
+  getTraineeSingleProgram,
+  updateSingleExerciseStatus,
 };

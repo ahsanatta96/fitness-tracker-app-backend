@@ -4,6 +4,7 @@ const cors = require("cors");
 var morgan = require("morgan");
 const chalk = require("chalk");
 const path = require("path");
+const cron = require("node-cron");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const errorMiddlware = require("./api/middleware/errors");
@@ -15,6 +16,7 @@ const publicRouter = require("./api/controllers/public/router");
 const traineeRouter = require("./api/controllers/trainee/router");
 const messageRouter = require("./api/controllers/messages/router");
 const Message = require("./api/models/messages");
+const Trainee = require("./api/models/trainee");
 
 //initializing App
 const app = express();
@@ -124,4 +126,43 @@ mongoose
 
 server.listen(process.env.PORT, () => {
   console.log(`Server is running on PORT : ${process.env.PORT}`);
+});
+
+// Schedule the cron job to run at midnight
+cron.schedule("0 0 * * *", async () => {
+  // cron.schedule("*/20 * * * * *", async () => {
+  try {
+    const trainees = await Trainee.find();
+
+    trainees.forEach((trainee) => {
+      trainee.program.forEach((program) => {
+        program.days.forEach((day) => {
+          day.exercises.forEach((exercise) => {
+            if (exercise.status === "pending") {
+              exercise.status = "missed";
+            }
+          });
+        });
+      });
+    });
+
+    // Use bulkWrite for better performance
+    const bulkOps = trainees.map((trainee) => ({
+      updateOne: {
+        filter: { _id: trainee._id },
+        update: { $set: trainee.toObject() },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      const result = await Trainee.bulkWrite(bulkOps);
+      console.log(
+        `Updated ${result.modifiedCount} trainee documents to missed.`
+      );
+    } else {
+      console.log("No trainees needed updating.");
+    }
+  } catch (error) {
+    console.error("Error updating trainee statuses:", error);
+  }
 });
