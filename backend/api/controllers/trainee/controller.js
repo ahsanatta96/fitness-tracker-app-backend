@@ -103,54 +103,6 @@ const updateSingleExerciseStatus = async (req, res) => {
   }
 };
 
-const updateExerciseStatus = async (req, res) => {
-  try {
-    const { id } = req.params; // exercise _id
-    const { status } = req.body; // new status
-
-    if (status !== "completed" || status !== "skipped") {
-      return res
-        .status(400)
-        .json({ message: `You can't set status to ${status}!` });
-    }
-
-    const trainee = await traineeService.findTraineeByUserId(req.user);
-    if (!trainee) {
-      return res.status(404).json({ message: "Trainee not found!" });
-    }
-
-    const program = trainee.program.find((program) => {
-      return program.days.find((day) => {
-        return day.exercises.find((exercise) => exercise._id.toString() === id);
-      });
-    });
-
-    if (!program) {
-      return res.status(404).json({ message: "Exercise not found!" });
-    }
-
-    const exercise = program.days
-      .find((day) => {
-        return day.exercises.find((exercise) => exercise._id.toString() === id);
-      })
-      .exercises.find((exercise) => exercise._id.toString() === id);
-
-    // Update values
-    exercise.status = status;
-    if (req.body.skipReason) {
-      exercise.skipReason = req.body.skipReason;
-    }
-    await traineeService.saveTrainee(trainee);
-
-    res.status(200).json({
-      message: "Exercise status updated successfully!",
-      data: exercise,
-    });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
 module.exports = {
   bookProgram,
   getAllPrograms,

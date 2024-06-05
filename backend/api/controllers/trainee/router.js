@@ -11,12 +11,6 @@ router.get(
   auth,
   controller.getTraineeSingleProgram
 );
-router.put(
-  "/update-exercise-status/:id",
-  auth,
-  sanitizeData,
-  controller.updateExerciseStatus
-);
 router.put("/update-status", auth, controller.updateSingleExerciseStatus);
 
 module.exports = router;
