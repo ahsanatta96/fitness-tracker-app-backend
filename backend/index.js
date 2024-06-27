@@ -36,7 +36,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("message", async (message, room, senderId, receiverId) => {
-  
     // Save the message to the database
     const newMessage = new Message({
       senderId: senderId,

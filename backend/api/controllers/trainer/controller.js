@@ -1,4 +1,7 @@
+const Trainee = require("../../models/trainee");
 const programService = require("../../services/program.service");
+const traineeService = require("../../services/trainee.service");
+const trainerService = require("../../services/trainer.service");
 const userService = require("../../services/user.service");
 
 const addProgram = async (req, res) => {
@@ -202,10 +205,68 @@ const deleteExercise = async (req, res) => {
   }
 };
 
+const trainerCustomersListing = async (req, res) => {
+  try {
+    if (req.role !== "trainer") {
+      return res
+        .status(400)
+        .json({ message: "Only trainers can view customers" });
+    }
+
+    const trainees = await traineeService.findTraineeByTrainerId(req.user);
+
+    const response = {
+      traineeCount: trainees.length,
+      trainees: trainees || [],
+    };
+
+    res.status(200).json({
+      message: "Customers fetched successfully!",
+      data: response,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching customers" });
+  }
+};
+
+const totalSales = async (req, res) => {
+  try {
+    if (req.role !== "trainer") {
+      return res
+        .status(400)
+        .json({ message: "Only trainers can view customers" });
+    }
+
+    const trainerId = req.user;
+
+    const trainees = await traineeService.findTraineeByTrainerId(trainerId);
+
+    let totalSales = 0;
+
+    trainees.forEach((trainee) => {
+      trainee.program.forEach((prog) => {
+        if (prog.trainerId.toString() == trainerId) {
+          totalSales += prog.price;
+        }
+      });
+    });
+
+    res.status(200).json({
+      message: "Total sales fetched successfully!",
+      data: totalSales,
+    });
+  } catch (error) {
+    console.log("Error fetching total sales:", error);
+    res.status(500).json({ message: "Internal Server Error", error });
+  }
+};
+
 module.exports = {
   addProgram,
   addDayToProgram,
   addExerciseToDay,
   updateExercise,
   deleteExercise,
+  trainerCustomersListing,
+  totalSales,
 };

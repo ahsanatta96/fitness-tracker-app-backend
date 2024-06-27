@@ -14,10 +14,17 @@ const findTraineeByUserId = (userId) => {
   });
 };
 
+const findTraineeByTrainerId = (trainerId) => {
+  return Trainee.find({
+    "program.trainerId": trainerId,
+  }).populate("userId", "first_name last_name email role status profile_image");
+};
+
 const traineeService = {
   newTrainee,
   saveTrainee,
   findTraineeByUserId,
+  findTraineeByTrainerId,
 };
 
 module.exports = traineeService;
